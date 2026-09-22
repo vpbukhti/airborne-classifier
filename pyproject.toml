@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "airbourne-classifier"
+version = "0.1.0"
+description = "A joke 3-class audio classifier: Airbourne (meaningful / meaningless) vs. not Airbourne."
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.1",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "numpy>=1.24",
+    "scikit-learn>=1.3",
+    "matplotlib>=3.7",
+    "tqdm>=4.66",
+    "yt-dlp>=2024.8.6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/airbourne_classifier"]
