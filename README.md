@@ -44,7 +44,7 @@ src/airbourne_classifier/
   infer.py       # single-song prediction, folder evaluation
   storage.py     # git-lfs + Google Drive helpers (see below)
 notebooks/
-  airbourne_classifier.ipynb   # train, evaluate, and run inference — same notebook
+  airbourne_classifier.ipynb   # build a dataset from YouTube links, train, and run inference — same notebook
 data/
   README.md      # expected data/raw/{meaningful,meaningless,non_airbourne}/*.mp3 layout
 models/
@@ -66,13 +66,20 @@ Google Drive is an optional per-user speed cache on top of that. The notebook's 
 3. Training (only runs if no checkpoint was loaded, or you force it) saves the new
    checkpoint locally, and **automatically** copies it to the Drive cache if
    `USE_DRIVE_CACHE` is on.
-4. Publishing a checkpoint back to GitHub via git-lfs is a **separate, manual** cell
-   near the end of the notebook — it never happens automatically. Run it only when
-   you deliberately want this exact checkpoint to become the new committed version.
+4. Publishing a checkpoint back to GitHub via git-lfs is **not part of the notebook** —
+   do it deliberately, from a terminal, only when you want this exact checkpoint to
+   become the new committed version:
 
-To push from Colab you need a GitHub token with `repo` scope, stored as a Colab
-secret named `GITHUB_TOKEN` (key icon in the left sidebar) — the notebook reads it
-from there and never prints it.
+   ```bash
+   git lfs track "models/*.pt"   # already set up via .gitattributes
+   git add models/airbourne_classifier.pt
+   git commit -m "Update trained model checkpoint"
+   git push
+   ```
+
+   `airbourne_classifier.storage.commit_and_push_model()` wraps the same steps if you'd
+   rather script it (e.g. from a Colab cell you add yourself, using a Colab secret named
+   `GITHUB_TOKEN` for auth).
 
 ## Local dev
 
@@ -90,11 +97,11 @@ or a GPU are needed to run them.
 Open `notebooks/airbourne_classifier.ipynb` in Google Colab (Runtime → T4 GPU). It:
 
 1. Clones this repo and installs dependencies + git-lfs.
-2. Lets you set two things in the Config cell: `USE_DRIVE_CACHE` and where your
-   labeled mp3s are.
-3. Trains (or loads an existing checkpoint per the flow above).
-4. Evaluates on a held-out labeled set (the automatic split, or your own
-   `data/test_raw/` if you provide one) — accuracy + confusion matrix.
-5. Runs inference on any single mp3 you point it at.
+2. Lets you set two things in the Config cell: `USE_DRIVE_CACHE` and Drive/local paths.
+3. Lets you build a dataset by pasting YouTube links against a label (form cell) —
+   N Airbourne songs split across `meaningful`/`meaningless`, plus M non-Airbourne songs.
+4. Trains (or loads an existing checkpoint per the flow above); training prints
+   held-out test accuracy automatically.
+5. Runs inference on any song by YouTube link.
 
-See `data/README.md` for the exact folder layout it expects.
+See `data/README.md` for the underlying folder layout it expects.
